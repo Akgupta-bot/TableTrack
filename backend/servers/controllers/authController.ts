@@ -2,11 +2,11 @@ import {Request,Response} from "express";
 import jwt from "jsonwebtoken";
 import {User} from "../models/user.js";
 import bcrypt from "bcrypt";
-import {AuthRequest} from "../middlewares/auth.ts"
+import {AuthRequest} from "../middlewares/auth.js"
 
 //helper to generate jwt token
 const generateToken = (id:String)=>{
-    return jwt.sign({id}),process.env.JWT_SECRET as string, {expireIn:"30d"}
+    return jwt.sign({id},process.env.JWT_SECRET as string, {expiresIn:"30d",})
 }
 
 //Register a new User
@@ -22,8 +22,9 @@ export const registerUser = async (req:Request,res:Response):Promise<void>=>{
 
          //check if user exist
          const userExist = await User.findOne({email})
-         if(userExists){
+         if(userExist){
             res.status(400).json({message: "user already exists"})
+            return;
          }
 
          //hash password
@@ -99,7 +100,7 @@ export const loginUser = async (req:Request,res:Response):Promise<void>=>{
 //Get /api/Uth/me
 //@access Private
   
-export const getme = async (req:Request,res:Response):Promise<void>=>{
+export const getme = async (req:AuthRequest,res:Response):Promise<void>=>{
     try{
         if(!req.user){
             res.status(401).json({message:"Not authorized"})
@@ -107,8 +108,8 @@ export const getme = async (req:Request,res:Response):Promise<void>=>{
         }
         res.json(req.user)
 
-    }catch(error){
+    }catch(error:any){
         console.error(error);
-        res.status(400).json({message:error.message});
+        res.status(500).json({message:error.message});
     }
 }

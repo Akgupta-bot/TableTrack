@@ -1,8 +1,9 @@
 import "dotenv/config";
-import express, { Request, Response } from 'express';
+import express, { Request, Response ,NextFunction} from 'express';
 import cors from "cors";
 import connectDB from "./config/db.js";
 import authRouter from "./servers/routes/authRoutes.js"
+import restaurantRouter from "./servers/routes/restaurantRoutes.js"
 
 const app = express();
 
@@ -19,11 +20,12 @@ app.get('/', (req: Request, res: Response) => {
     res.send('Server is Live!');
 });
 app.use("/api/auth",authRouter)
+app.use("/api/restaurant",restaurantRouter)
 //Global Error Handler
 app.use((err:Error,req:Request,res:Response,next:NextFunction)=>{
-    console.error("unhandle Error:,err");
+    console.error("unhandled Error:",err);
     res.status(500).json({
-        message:err:message||"Internal server Error",
+        message:err.message||"Internal server Error",
         stack:process.env.NODE_ENV==="production"? undefined :err.stack,
     })
 })
