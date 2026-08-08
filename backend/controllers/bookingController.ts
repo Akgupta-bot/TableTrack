@@ -1,6 +1,7 @@
 import { AuthRequest } from "../middlewares/auth.js" 
 import {Response, Request } from "express"   
 import Booking from "../models/Booking.js";
+import { Restaurant } from "../models/restaurant.js"
 //Create a new booking
 //Post /api/Bookings
 //@access Private
@@ -32,7 +33,7 @@ export const createBooking = async(req:AuthRequest,res:Response):Promise<void> =
             status:"confirmed",
 
         })
-        const bookedSeats = existingBookings,reduce((sum,b)=>sum+b.guests,0)
+        const bookedSeats = existingBookings.reduce((sum,b)=>sum+b.guests,0)
 
         const totalSeats =restaurant.totalSeats||20;
         const availableSeats = totalSeats -bookedSeats;
@@ -71,9 +72,8 @@ export const createBooking = async(req:AuthRequest,res:Response):Promise<void> =
 
 export const getMyBookings = async(req:AuthRequest,res:Response):Promise<void> =>{
     try{
-         const booking =await Booking.find({user:req.user?._id}).populate("restaurant","name location address slug").sort({date:-1,time:-1})
-
-         res.json(bookings);
+         const booking =await Booking.find({user:req.user?._id,}).populate("restaurant","name location address slug").sort({date:-1,time:-1});
+         res.json(booking);
     }catch(error:any){
         console.error(error);
         res.status(400).json({message:error.message});
